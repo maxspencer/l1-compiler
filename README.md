@@ -19,6 +19,8 @@ I have only compiled and run the code on my own machine which has Ubuntu 10.04 a
 
 then `./l1c [options] <target file>` to compile something! I plan to add a `--help` flag in the next commit to explain the options. Also one of the "options" to output jvm bytecode is actually not optional so I need to fix that.
 
+For some immediate gratification, just do `./l1c -d tree.dot test.l1` and then check out the tree.dot and bytecode.jvm files that are generated.
+
 Closing Comments
 ----------------
 
