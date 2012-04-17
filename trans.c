@@ -1,7 +1,7 @@
-#include "parsetree.h"
+#include "syn.h"
 #include "tab.h"
 
-void transexprjvm(FILE *fp, struct E *e, Table *tab, int *li) {
+void transexprjvm(FILE *fp, Expr *e, Table *tab, int *li) {
   /* Translate expression 'e' with variable table 'tab' to JVM bytecodes and
      print to the given file.
   */
@@ -79,7 +79,7 @@ void transexprjvm(FILE *fp, struct E *e, Table *tab, int *li) {
   }
 }
 
-void transprogjvm(FILE *fp, struct E *prog, Table *tab) {
+void transprogjvm(FILE *fp, Expr *prog, Table *tab) {
   // First put initial values of the variables into memory.
   int i, j, v;
   for (i = 0, v = -1; (v = valfromindex(tab, i)) > 0; i++) {

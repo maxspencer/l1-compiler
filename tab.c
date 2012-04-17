@@ -25,7 +25,6 @@ Table *mktab(void) {
     t->next = t->entries;
     t->limit = t->entries+BLOCKSIZE;
     t->count = 0;
-    printf("Table initiliased with...\nt->entries=%p\nt->next=%p\nt->limit=%p\n", t->entries, t->next, t->limit);
     return t;
   } else {
     return NULL;

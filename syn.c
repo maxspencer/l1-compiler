@@ -2,12 +2,10 @@
 #include <stdlib.h>
 
 char *flavours[] = {";", "while do", "if then else", ":=", "+", ">=", "!", 
-		    "()", "var", "number", "bool", "skip" };
-
-struct E {
+		    "()", "var", "number", "bool", "skip"};
+typedef struct E {
   enum { E_seq, E_while, E_if, E_assign, E_plus, E_gteq, E_access, E_bracket,
 	 E_var, E_number, E_bool, E_skip } flavour;
-
   union {
     /* E_if */
     struct { struct E *left, *middle, *right; } triad;
@@ -22,26 +20,26 @@ struct E {
     /* E_var */
     char *var;
   } u;
-};
+} Expr;
 
-struct E *make_E_seq(struct E *e1, struct E *e2) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkseq(Expr *e1, Expr *e2) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_seq;
   r->u.diad.left = e1;
   r->u.diad.right = e2;
   return r;
 }
 
-struct E *make_E_while(struct E *cond, struct E *e) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkwhile(Expr *cond, Expr *e) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_while;
   r->u.diad.left = cond;
   r->u.diad.right = e;
   return r;
 }
 
-struct E *make_E_if(struct E *cond, struct E *e1, struct E *e2) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkif(Expr *cond, Expr *e1, Expr *e2) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_if;
   r->u.triad.left = cond;
   r->u.triad.middle = e1;
@@ -49,92 +47,92 @@ struct E *make_E_if(struct E *cond, struct E *e1, struct E *e2) {
   return r;
 }
 
-struct E *make_E_assign(struct E *var, struct E *val) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkassign(Expr *var, Expr *val) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_assign;
   r->u.diad.left = var;
   r->u.diad.right = val;
   return r;
 }
 
-struct E *make_E_plus(struct E *a, struct E *b) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkplus(Expr *a, Expr *b) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_plus;
   r->u.diad.left = a;
   r->u.diad.right = b;
   return r;
 }
 
-struct E *make_E_gteq(struct E *a, struct E *b) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkgteq(Expr *a, Expr *b) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_gteq;
   r->u.diad.left = a;
   r->u.diad.right = b;
   return r;
 }
 
-struct E *make_E_access(struct E *var) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkaccess(Expr *var) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_access;
   r->u.monad.child = var;
   return r;
 }
 
-struct E *make_E_bracket(struct E *e) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkbracket(Expr *e) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_bracket;
   r->u.monad.child = e;
   return r;
 }
 
-struct E *make_E_number(int n) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mknumber(int n) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_number;
   r->u.number = n;
   return r;
 }
 
-struct E *make_E_bool(int b) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkbool(int b) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_bool;
   r->u.bool = b;
   return r;
 }
 
-struct E *make_E_var(char *var) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkvar(char *var) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_var;
   r->u.var = var;
   return r;
 }
 
-struct E *make_E_skip(void) {
-  struct E *r = (struct E *) malloc(sizeof(struct E));
+Expr *mkskip(void) {
+  Expr *r = (Expr *) malloc(sizeof(Expr));
   r->flavour = E_skip;
   return r;
 }
 
-void print_E(struct E *tree) {
-  /* Print and expression parse tree in a human-readable format to stdout.
+void printe(Expr *tree) {
+  /* Print an Expr tree in a human-readable format to stdout.
   */
   printf("--- %p ---\n  %s\n", tree, flavours[tree->flavour]);
   switch(tree->flavour) {
   case E_if:
     printf("  left = %p\n  middle = %p\n  right = %p\n",
 	   tree->u.triad.left, tree->u.triad.middle, tree->u.triad.right);
-    print_E(tree->u.triad.left);
-    print_E(tree->u.triad.middle);
-    print_E(tree->u.triad.right);
+    printe(tree->u.triad.left);
+    printe(tree->u.triad.middle);
+    printe(tree->u.triad.right);
     break;
   case E_seq: case E_while: case E_assign: case E_plus: case E_gteq:
     printf("  left = %p\n  right = %p\n",
 	   tree->u.diad.left, tree->u.diad.right);
-    print_E(tree->u.diad.left);
-    print_E(tree->u.diad.right);
+    printe(tree->u.diad.left);
+    printe(tree->u.diad.right);
     break;
   case E_access: case E_bracket:
     printf("  child = %p\n", tree->u.monad.child);
-    print_E(tree->u.monad.child);
+    printe(tree->u.monad.child);
     break;
   case E_number:
     printf("  %d\n", tree->u.number);
@@ -151,7 +149,7 @@ void print_E(struct E *tree) {
   }
 }
 
-void dotprint_E(FILE *fp, struct E *e, int *i) {
+void fdote(FILE *fp, Expr *e, int *i) {
   /* Print the parse tree of an expression in DOT format to the given file, so
      that it can be drawn with graphviz tools. 'i' is a pointer to an int
      allocated as the index for the nodes of the graph, when i is 0, that node
@@ -188,33 +186,33 @@ void dotprint_E(FILE *fp, struct E *e, int *i) {
   switch(e->flavour) {
   case E_if:
     fprintf(fp, "  node_%d -- node_%d [label=\"left\"];\n", j, *i);
-    dotprint_E(fp, e->u.triad.left, i);
+    fdote(fp, e->u.triad.left, i);
     fprintf(fp, "  node_%d -- node_%d [label=\"middle\"];\n", j, *i);
-    dotprint_E(fp, e->u.triad.middle, i);
+    fdote(fp, e->u.triad.middle, i);
     fprintf(fp, "  node_%d -- node_%d [label=\"right\"];\n", j, *i);
-    dotprint_E(fp, e->u.triad.right, i);
+    fdote(fp, e->u.triad.right, i);
     break;
   case E_seq: case E_while: case E_plus: case E_gteq:
     fprintf(fp, "  node_%d -- node_%d [label=\"left\"];\n", j, *i);
-    dotprint_E(fp, e->u.diad.left, i);
+    fdote(fp, e->u.diad.left, i);
     fprintf(fp, "  node_%d -- node_%d [label=\"right\"];\n", j, *i);
-    dotprint_E(fp, e->u.diad.right, i);
+    fdote(fp, e->u.diad.right, i);
     break;
   case E_assign:
     fprintf(fp, "  node_%d -- node_%s [label=\"left\"];\n",
 	   j, e->u.diad.left->u.var);
-    dotprint_E(fp, e->u.diad.left, i);
+    fdote(fp, e->u.diad.left, i);
     fprintf(fp, "  node_%d -- node_%d [label=\"right\"];\n", j, *i);
-    dotprint_E(fp, e->u.diad.right, i);
+    fdote(fp, e->u.diad.right, i);
     break;
   case E_bracket:
     fprintf(fp, "  node_%d -- node_%d [label=\"child\"];\n", j, *i);
-    dotprint_E(fp, e->u.monad.child, i);
+    fdote(fp, e->u.monad.child, i);
     break;
   case E_access:
     fprintf(fp, "  node_%d -- node_%s [label=\"child\"];\n",
 	   j, e->u.monad.child->u.var);
-    dotprint_E(fp, e->u.monad.child, i);
+    fdote(fp, e->u.monad.child, i);
     break;
   default:
     // All other nodes have no edges.
